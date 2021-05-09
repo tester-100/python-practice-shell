@@ -1,10 +1,36 @@
 """
+Python Practice Shell
+
+This is the main file for the project 'Python Practice Shell'. This file defines the structure, command parsing algorithm as well as the command executing codes for the shell program. The entire project is powered by Python3, i.e., written in Python3 programming language.
+
+Author : Rishav Das (https://github.com/rdofficial/)
+Created on : May 8, 2021
+
+Last modified by : Rishav Das (https://github.com/rdofficial/)
+Last modified on : May 9, 2021
+
+Changes made in the last modification :
+1. Added more functionality to the 'list-files' / 'ls' command of the shell program. Added more arguments, changed the old way of detecting the user specified directory location or the user specified argument.
+2. Created a new module named 'directory.py' and defined the 'FilesLister' class in it. The module will contain and serve the functions related to file listing, and directory handling.
+3. Added commented docs to the entire script files + added more comments to make the code understandable to coders / programmer even after leaving the project abandoned from almost a year or more..LOL!
+4. Added a .gitignore (the ignore file list for this GIT repository) in order to ignore some of the files that are not required to be pushed to the remote mirror of this repository.
+
+Authors contributed to this script (Add your name below if you have contributed) :
+1. Rishav Das (github:https://github.com/rdofficial/, email:rdofficial192@gmail.com)
 """
 
 # Importing the required modules
 try:
+	# Importing regular modules (the ones that are available in the standard python library)
 	from os import system, path, listdir, remove, chdir, mkdir
 	from sys import platform, argv as arguments
+
+	# Importing the installed modules (the ones that are installed using pip3, or any external source)
+	# 
+
+	# Importing the self-defined modules (the custom modules created in this project)
+	from modules import directory as DirectoryTools
+	# from modules import 
 except Exception as e:
 	# If there are any errors during the importing of the modules, then we display the error on the console screen
 
@@ -79,29 +105,92 @@ class Shell:
 			# If the user entered command is to list the files and folders of the current directory, then we continue
 
 			# Setting a blank variable for directory location
-			directory = ''
+			directoryLocation = ''
 
 			# Checking the user entered arguments
 			if len(token["arguments"]) == 0:
 				# If there are no arguments entered by the user, then we consider the current folder files to be listed
 
-				directory = self.currentWorkingDirectory
+				directoryLocation = self.currentWorkingDirectory
 			else:
 				# If there are arguments entered by the user, then we consider the first argument to be the directory location
 
-				directory = token["arguments"][0]
+				if token["arguments"][0].lower() == '':
+					# If the user entered argument is blank, then we consider the current working directory as the directory to be listed
+
+					directoryLocation = self.currentWorkingDirectory
+				elif token["arguments"][0].lower() == '--help':
+					# If the user entered argument to display help info for list-files command, then we continue
+
+					self.help('--help')
+					return 0
+				elif token["arguments"][0].lower() == '--tree' or token["arguments"][0].lower() == '-t':
+					# If the user added the argument to display the directory info in the tree format
+
+					if len(token["arguments"]) >= 2:
+						# If the user entered 2 or more arguments, then we continue
+					
+						if token["arguments"][1] == '':
+							# If the argument entered by the user is blank, then we conside the current working directory as the argument
+
+							token["arguments"][1] = self.currentWorkingDirectory
+
+						DirectoryTools.FilesLister(directory = token["arguments"][1], tree = True)
+					else:
+						# If the user does not entered more than 2 arguments, then we display an error on the console screen
+
+						print(f'[ Error : Mention a directory location post --tree argument ]')
+					return 0
+				elif token["arguments"][0].lower() == '--directory' or token["arguments"][0].lower() == '-d':
+					# If the user added the argument to specify the directory, then we continue with it
+
+					if len(token["arguments"]) >= 2:
+						# If the user entered 2 or more arguments, then we continue
+					
+						if token["arguments"][1] == '':
+							# If the argument entered by the user is blank, then we conside the current working directory as the argument
+
+							token["arguments"][1] = self.currentWorkingDirectory
+
+						directoryLocation = token["arguments"][1]
+					else:
+						# If the user does not entered more than 2 arguments, then we display an error on the console screen
+
+						print(f'[ Error : Mention a directory location post --directory argument ]')
+					return 0
+				elif token["arguments"][0].lower() == '--size' or token["arguments"][0].lower() == '-s':
+					# If the user added the argument to specify the size of the files too while listing them
+
+					if len(token["arguments"]) >= 2:
+						# If the user entered 2 or more arguments, then we continue
+					
+						if token["arguments"][1] == '':
+							# If the argument entered by the user is blank, then we conside the current working directory as the argument
+
+							token["arguments"][1] = self.currentWorkingDirectory
+
+						DirectoryTools.FilesLister(directory = token["arguments"][1], size = True)
+					else:
+						# If the user does not entered more than 2 arguments, then we display an error on the console screen
+
+						print(f'[ Error : Mention a directory location post --size argument ]')
+					return 0
+				else:
+					# If the argument is not recognized, then we treat it as the directory location
+
+					directoryLocation = token["arguments"][0]
 
 			# Checking if the specified directory exists or not
-			if path.isdir(directory):
+			if path.isdir(directoryLocation):
 				# If the user specified directory exists, then we continue to list the files
 
-				print(f'\nContents of "{directory} :')
-				for i in listdir(directory):
+				print(f'\nContents of "{directoryLocation}" :')
+				for i in listdir(directoryLocation):
 					print(f'[*] {i}')
 			else:
 				# If the user specified directory does not exists, then we display an error message on the screen
 
-				print(f'[ Error : No such directory "{directory}" ]')
+				print(f'[ Error : No such directory "{directoryLocation}" ]')
 				return 0
 		elif token["command"] == 'add':
 			# If the user command is to add, then we continue
@@ -166,10 +255,17 @@ class Shell:
 
 			print(f'[ Command not recognized : {self.command.split(" ")[0]} ]')
 
-	def help(self, command):
+	def help(self, command = None):
 		""" """
 
-		print(f'Help info for command : {command}')
+		if command == None:
+			# If the command is not mentioned, then we display the help info for the entire shell
+
+			print(f'Help info for overall shell project')
+		else:
+			# If the command is mentioned, then we display the help info for the specified command
+
+			print(f'Help info for command : {command}')
 
 if __name__ == '__main__':
 	try:
@@ -177,6 +273,7 @@ if __name__ == '__main__':
 	except KeyboardInterrupt:
 		# If the user presses CTRL+C key combo, then we exit the script
 
+		print('\n[ Exiting the shell ]')
 		exit()
 	except Exception as e:
 		# If there are any errors during the process, then we display the error on the console screen
