@@ -10,10 +10,7 @@ Last modified by : Rishav Das (https://github.com/rdofficial/)
 Last modified on : May 9, 2021
 
 Changes made in the last modification :
-1. Added more functionality to the 'list-files' / 'ls' command of the shell program. Added more arguments, changed the old way of detecting the user specified directory location or the user specified argument.
-2. Created a new module named 'directory.py' and defined the 'FilesLister' class in it. The module will contain and serve the functions related to file listing, and directory handling.
-3. Added commented docs to the entire script files + added more comments to make the code understandable to coders / programmer even after leaving the project abandoned from almost a year or more..LOL!
-4. Added a .gitignore (the ignore file list for this GIT repository) in order to ignore some of the files that are not required to be pushed to the remote mirror of this repository.
+1. Added a new command of 'cd' / 'change-directory' / 'chdir' / 'change-dir'.
 
 Authors contributed to this script (Add your name below if you have contributed) :
 1. Rishav Das (github:https://github.com/rdofficial/, email:rdofficial192@gmail.com)
@@ -192,6 +189,42 @@ class Shell:
 
 				print(f'[ Error : No such directory "{directoryLocation}" ]')
 				return 0
+		elif token["command"] == 'change-directory' or token["command"] == 'change-dir' or token["command"] == 'chdir' or token["command"] == 'cd':
+			# If the user entered command is to change the current working directory, then we continue the process
+
+			# Checking for any argument to this command
+			if len(token["arguments"]) == 0:
+				# If there are no any arguments entered by the user, then we use the unix way and thus we kick the current working directory to the initial directory
+
+				self.currentWorkingDirectory = self.initialDirectory
+				chdir(self.currentWorkingDirectory)
+			else:
+				# If there are atleast 1 or more arguments entered by the user, then we continue to check them
+
+				if token["arguments"][0] == '':
+					# If the argument entered by the user is blank, then we make switch the current working directory to the initial directory
+
+					self.currentWorkingDirectory = self.initialDirectory
+					chdir(self.currentWorkingDirectory)
+				else:
+					# If the argument entered by the user is not blank, then we continue to check wheter a directory or not
+
+					if path.isdir(token["arguments"][0]):
+						# If the argument entered by the user is a existing directory, then we switch our current working directory to the user specified directory
+
+						self.currentWorkingDirectory = token["arguments"][0]
+						chdir(self.currentWorkingDirectory)
+					else:
+						# If the argument entered by the user is not an existing directory, then we check for other argument type
+
+						if token["arguments"][0].lower(0) == '--help' or token["arguments"][0].lower(0) == '-h':
+							# If the argument entered by the user asks for displaying the help info for the command, then we continue to do it
+
+							self.help('cd')
+						else:
+							# If the argument entered by the user is neither recognized by the script nor it is a existing directory, then we display an directory not found error
+
+							print(f'[ Error : No such directory "{token["arguments"][0]}" ]')
 		elif token["command"] == 'add':
 			# If the user command is to add, then we continue
 
